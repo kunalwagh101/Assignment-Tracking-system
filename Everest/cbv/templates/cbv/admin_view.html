@@ -1,0 +1,96 @@
+{% extends 'cbv/base.html' %}
+
+{% block content %}
+<div class="container mt-5 mb-4">
+    {% include 'cbv/message.html' %}
+    <h3 class="text-center my-5">All Assignments</h3>
+
+    <div class="table-responsive">
+        {% if assignments %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Assignment</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th class="d-none d-sm-table-cell col-6 col-sm-4">Link of Assignments</th>
+                        <th>Deadline</th>
+                        <th>Arrived on</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assignment in assignments %}
+                        <tr>
+                            <th>{{ assignment.category }}</th>
+                            <td>{{ assignment.title }}</td>
+                            <td>{{ assignment.description }}</td>
+                            <td class="d-none d-sm-table-cell">
+                                <a href="{{ assignment.assignment_link }}" data-bs-toggle="popover" data-bs-content="{{ assignment.assignment_link }}" data-bs-trigger="hover" data-bs-placement="top" role="button" class="text-decoration-none text-dark" target="_blank" style="transition: color 0.3s;">
+                                    {{ assignment.assignment_link|truncatechars:20 }}
+                                    <button class="btn btn-sm btn-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Open in New Tab" style="pointer-events: none;">Open</button>
+                                </a>
+                            </td>
+                            <td>{{ assignment.deadline|date:"h:i A, F d, Y" }}</td>
+                            <td>{{ assignment.delivery_time|date:"h:i A, F d, Y" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Bootstrap Pagination -->
+            {% if is_paginated %}
+                <div class="pagination justify-content-center mt-3">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endfor %}
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% else %}
+            <p>No assignments available.</p>
+        {% endif %}
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl);
+        });
+
+        var clipboard = new ClipboardJS('.copy-btn');
+
+        clipboard.on('success', function (e) {
+            var tooltip = new bootstrap.Tooltip(e.trigger);
+            tooltip.show();
+        });
+    });
+</script>
+
+{% endblock %}
